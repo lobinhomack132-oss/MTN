@@ -1,0 +1,2496 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>MTN — Movimento Tático Nacional</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=JetBrains+Mono:wght@300;400;500&display=swap" rel="stylesheet" />
+
+  <style>
+    /* ─── TOKENS ─────────────────────────────────────────────── */
+    :root {
+      --c-bg:       #0b0b0b;
+      --c-surface:  #111111;
+      --c-card:     #161616;
+      --c-border:   #222222;
+      --c-border-l: #2e2e2e;
+      --c-muted:    #555555;
+      --c-mid:      #888888;
+      --c-light:    #cccccc;
+      --c-near:     #eeeeee;
+      --c-white:    #ffffff;
+
+      --font-display: 'Space Grotesk', sans-serif;
+      --font-mono:    'JetBrains Mono', monospace;
+
+      --nav-h: 56px;
+      --r:     3px;
+
+      --ease: cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    /* ─── RESET ──────────────────────────────────────────────── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+    body {
+      background: var(--c-bg);
+      color: var(--c-near);
+      font-family: var(--font-display);
+      font-size: 16px;
+      line-height: 1.6;
+      overflow-x: hidden;
+      -webkit-font-smoothing: antialiased;
+    }
+    a { color: inherit; text-decoration: none; }
+    button { cursor: pointer; font-family: inherit; border: none; background: none; }
+    ul { list-style: none; }
+
+    /* ─── CANVAS ─────────────────────────────────────────────── */
+    #bg-canvas {
+      position: fixed;
+      inset: 0;
+      z-index: 0;
+      pointer-events: none;
+      opacity: 0.35;
+    }
+
+    /* ─── LAYOUT WRAPPER ─────────────────────────────────────── */
+    .site-wrap { position: relative; z-index: 1; }
+
+    /* ─── NAV ────────────────────────────────────────────────── */
+    nav {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      height: var(--nav-h);
+      background: rgba(11,11,11,0.92);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--c-border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 clamp(24px, 5vw, 80px);
+      z-index: 100;
+    }
+    .nav-logo {
+      font-family: var(--font-mono);
+      font-size: 12px;
+      font-weight: 500;
+      letter-spacing: 0.18em;
+      color: var(--c-white);
+      text-transform: uppercase;
+    }
+    .nav-logo span {
+      color: var(--c-muted);
+      margin-right: 10px;
+    }
+    .nav-links {
+      display: flex;
+      gap: 32px;
+      align-items: center;
+    }
+    .nav-links a {
+      font-family: var(--font-mono);
+      font-size: 10px;
+      font-weight: 400;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+      color: var(--c-muted);
+      transition: color 0.2s;
+    }
+    .nav-links a:hover { color: var(--c-white); }
+    .nav-cta {
+      font-family: var(--font-mono);
+      font-size: 10px;
+      font-weight: 500;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--c-bg);
+      background: var(--c-white);
+      padding: 8px 18px;
+      border-radius: var(--r);
+      transition: opacity 0.2s;
+    }
+    .nav-cta:hover { opacity: 0.85; }
+
+    /* ─── SECTIONS COMMON ────────────────────────────────────── */
+    section {
+      padding: clamp(80px, 12vw, 160px) clamp(24px, 5vw, 80px);
+    }
+    .label {
+      font-family: var(--font-mono);
+      font-size: 10px;
+      font-weight: 400;
+      letter-spacing: 0.22em;
+      text-transform: uppercase;
+      color: var(--c-muted);
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 48px;
+    }
+    .label::before {
+      content: '';
+      display: block;
+      width: 24px;
+      height: 1px;
+      background: var(--c-muted);
+      flex-shrink: 0;
+    }
+
+    /* ─── HERO ───────────────────────────────────────────────── */
+    #hero {
+      min-height: 100svh;
+      display: grid;
+      grid-template-rows: 1fr auto;
+      padding-top: calc(var(--nav-h) + clamp(60px, 10vw, 120px));
+      border-bottom: 1px solid var(--c-border);
+    }
+    .hero-content {}
+    .hero-eyebrow {
+      font-family: var(--font-mono);
+      font-size: 10px;
+      letter-spacing: 0.24em;
+      text-transform: uppercase;
+      color: var(--c-muted);
+      margin-bottom: 32px;
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+    .hero-eyebrow::before {
+      content: '';
+      display: inline-block;
+      width: 6px; height: 6px;
+      border: 1px solid var(--c-muted);
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+    h1 {
+      font-family: var(--font-display);
+      font-size: clamp(52px, 9vw, 128px);
+      font-weight: 700;
+      line-height: 0.92;
+      letter-spacing: -0.03em;
+      color: var(--c-white);
+      max-width: 900px;
+      margin-bottom: 40px;
+    }
+    h1 em {
+      font-style: normal;
+      color: var(--c-mid);
+    }
+    .hero-sub {
+      font-size: clamp(15px, 1.5vw, 18px);
+      font-weight: 300;
+      color: var(--c-mid);
+      max-width: 480px;
+      line-height: 1.7;
+      margin-bottom: 52px;
+    }
+    .hero-actions {
+      display: flex;
+      gap: 14px;
+      flex-wrap: wrap;
+    }
+    .btn-solid {
+      font-family: var(--font-mono);
+      font-size: 11px;
+      font-weight: 500;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--c-bg);
+      background: var(--c-white);
+      padding: 14px 30px;
+      border-radius: var(--r);
+      transition: opacity 0.2s var(--ease);
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .btn-solid:hover { opacity: 0.85; }
+    .btn-outline {
+      font-family: var(--font-mono);
+      font-size: 11px;
+      font-weight: 400;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--c-mid);
+      border: 1px solid var(--c-border-l);
+      padding: 14px 30px;
+      border-radius: var(--r);
+      transition: color 0.2s, border-color 0.2s;
+    }
+    .btn-outline:hover { color: var(--c-white); border-color: var(--c-mid); }
+
+    /* HERO METRICS */
+    .hero-metrics {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      border-top: 1px solid var(--c-border);
+      margin-top: clamp(60px, 8vw, 100px);
+    }
+    .metric {
+      padding: 32px 0;
+      border-right: 1px solid var(--c-border);
+    }
+    .metric:last-child { border-right: none; }
+    .metric:not(:first-child) { padding-left: 32px; }
+    .metric-num {
+      font-family: var(--font-mono);
+      font-size: clamp(36px, 5vw, 60px);
+      font-weight: 300;
+      color: var(--c-white);
+      line-height: 1;
+      letter-spacing: -0.03em;
+      margin-bottom: 8px;
+    }
+    .metric-label {
+      font-family: var(--font-mono);
+      font-size: 10px;
+      color: var(--c-muted);
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+    }
+
+    /* ─── PILARES ────────────────────────────────────────────── */
+    #pilares {
+      border-bottom: 1px solid var(--c-border);
+    }
+    .pilares-header {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 40px;
+      align-items: end;
+      margin-bottom: 72px;
+    }
+    h2 {
+      font-family: var(--font-display);
+      font-size: clamp(32px, 4.5vw, 60px);
+      font-weight: 700;
+      line-height: 1.05;
+      letter-spacing: -0.025em;
+      color: var(--c-white);
+    }
+    .pilares-desc {
+      font-size: 15px;
+      color: var(--c-mid);
+      line-height: 1.75;
+      max-width: 380px;
+      justify-self: end;
+    }
+    .pilares-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 1px;
+      background: var(--c-border);
+      border: 1px solid var(--c-border);
+      border-radius: var(--r);
+      overflow: hidden;
+    }
+    .pilar-card {
+      background: var(--c-card);
+      padding: clamp(28px, 4vw, 48px);
+      transition: background 0.25s;
+    }
+    .pilar-card:hover { background: #1d1d1d; }
+    .pilar-glyph {
+      font-family: var(--font-mono);
+      font-size: 11px;
+      color: var(--c-muted);
+      letter-spacing: 0.12em;
+      margin-bottom: 28px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .pilar-glyph::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: var(--c-border-l);
+    }
+    .pilar-card h3 {
+      font-family: var(--font-display);
+      font-size: clamp(17px, 2vw, 22px);
+      font-weight: 600;
+      color: var(--c-white);
+      letter-spacing: -0.01em;
+      margin-bottom: 14px;
+      line-height: 1.25;
+    }
+    .pilar-card p {
+      font-size: 14px;
+      color: var(--c-mid);
+      line-height: 1.7;
+    }
+
+    /* ─── ESTRUTURA (TABS) ───────────────────────────────────── */
+    #estrutura {
+      border-bottom: 1px solid var(--c-border);
+    }
+    .tabs-nav {
+      display: flex;
+      border-bottom: 1px solid var(--c-border);
+      margin-bottom: 0;
+      overflow-x: auto;
+      scrollbar-width: none;
+    }
+    .tabs-nav::-webkit-scrollbar { display: none; }
+    .tab-btn {
+      font-family: var(--font-mono);
+      font-size: 10px;
+      font-weight: 400;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--c-muted);
+      padding: 18px 28px;
+      border-bottom: 2px solid transparent;
+      transition: color 0.2s, border-color 0.2s;
+      white-space: nowrap;
+      flex-shrink: 0;
+    }
+    .tab-btn.active {
+      color: var(--c-white);
+      border-bottom-color: var(--c-white);
+    }
+    .tab-btn:hover:not(.active) { color: var(--c-light); }
+    .tabs-body {
+      padding-top: 52px;
+    }
+    .tab-panel {
+      display: none;
+      animation: fadeIn 0.18s var(--ease);
+    }
+    .tab-panel.active { display: grid; grid-template-columns: 1fr 1fr; gap: 48px; align-items: start; }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(6px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    .tab-panel-info {}
+    .tab-panel-info h3 {
+      font-size: clamp(22px, 3vw, 34px);
+      font-weight: 600;
+      color: var(--c-white);
+      letter-spacing: -0.02em;
+      margin-bottom: 20px;
+      line-height: 1.2;
+    }
+    .tab-panel-info p {
+      font-size: 14px;
+      color: var(--c-mid);
+      line-height: 1.8;
+      margin-bottom: 16px;
+    }
+    .tab-data {
+      background: var(--c-card);
+      border: 1px solid var(--c-border);
+      border-radius: var(--r);
+      overflow: hidden;
+    }
+    .tab-data-header {
+      font-family: var(--font-mono);
+      font-size: 9px;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--c-muted);
+      padding: 14px 20px;
+      border-bottom: 1px solid var(--c-border);
+      display: flex;
+      gap: 6px;
+    }
+    .tab-data-header span { opacity: 0.4; }
+    .tab-data-body { padding: 20px; }
+    .data-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 12px 0;
+      border-bottom: 1px solid var(--c-border);
+    }
+    .data-row:last-child { border-bottom: none; }
+    .data-key {
+      font-family: var(--font-mono);
+      font-size: 11px;
+      color: var(--c-muted);
+      letter-spacing: 0.04em;
+    }
+    .data-val {
+      font-family: var(--font-mono);
+      font-size: 11px;
+      color: var(--c-light);
+    }
+
+    /* ─── HISTÓRICO (ACCORDION) ──────────────────────────────── */
+    #historico {
+      border-bottom: 1px solid var(--c-border);
+    }
+    .accordion-list {}
+    .accordion-item {
+      border-bottom: 1px solid var(--c-border);
+    }
+    .accordion-item:first-child { border-top: 1px solid var(--c-border); }
+    .accordion-trigger {
+      width: 100%;
+      display: grid;
+      grid-template-columns: 120px 1fr auto;
+      align-items: center;
+      gap: 24px;
+      padding: 28px 0;
+      text-align: left;
+      transition: opacity 0.2s;
+    }
+    .accordion-trigger:hover { opacity: 0.75; }
+    .acc-date {
+      font-family: var(--font-mono);
+      font-size: 11px;
+      color: var(--c-muted);
+      letter-spacing: 0.08em;
+    }
+    .acc-title {
+      font-size: clamp(14px, 1.5vw, 17px);
+      font-weight: 500;
+      color: var(--c-near);
+      letter-spacing: -0.01em;
+    }
+    .acc-icon {
+      width: 20px;
+      height: 20px;
+      border: 1px solid var(--c-border-l);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      transition: transform 0.3s var(--ease), border-color 0.2s;
+    }
+    .acc-icon svg {
+      transition: transform 0.3s var(--ease);
+    }
+    .accordion-item.open .acc-icon { border-color: var(--c-mid); }
+    .accordion-item.open .acc-icon svg { transform: rotate(45deg); }
+    .accordion-body {
+      display: grid;
+      grid-template-rows: 0fr;
+      transition: grid-template-rows 0.32s var(--ease);
+    }
+    .accordion-item.open .accordion-body {
+      grid-template-rows: 1fr;
+    }
+    .accordion-inner {
+      overflow: hidden;
+    }
+    .accordion-inner p {
+      font-size: 14px;
+      color: var(--c-mid);
+      line-height: 1.8;
+      padding: 0 0 32px 144px;
+      max-width: 680px;
+    }
+
+    /* ─── CÚPULA ─────────────────────────────────────────────── */
+    #cupula {
+      border-bottom: 1px solid var(--c-border);
+    }
+    .cupula-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 1px;
+      background: var(--c-border);
+      border: 1px solid var(--c-border);
+      border-radius: var(--r);
+      overflow: hidden;
+    }
+    .cupula-card {
+      background: var(--c-card);
+      padding: clamp(28px, 4vw, 44px);
+      position: relative;
+      overflow: hidden;
+    }
+    .cupula-rank {
+      font-family: var(--font-mono);
+      font-size: 9px;
+      letter-spacing: 0.22em;
+      text-transform: uppercase;
+      color: var(--c-muted);
+      margin-bottom: 40px;
+    }
+    .cupula-name {
+      font-size: clamp(24px, 3.5vw, 40px);
+      font-weight: 700;
+      color: var(--c-white);
+      letter-spacing: -0.025em;
+      line-height: 1;
+      margin-bottom: 12px;
+    }
+    .cupula-title {
+      font-family: var(--font-mono);
+      font-size: 11px;
+      color: var(--c-muted);
+      line-height: 1.6;
+    }
+    .cupula-bg-num {
+      position: absolute;
+      bottom: -20px;
+      right: 16px;
+      font-family: var(--font-mono);
+      font-size: 100px;
+      font-weight: 700;
+      color: var(--c-border);
+      line-height: 1;
+      pointer-events: none;
+      user-select: none;
+    }
+
+    /* ─── FOOTER ─────────────────────────────────────────────── */
+    footer {
+      padding: 40px clamp(24px, 5vw, 80px);
+      border-top: 1px solid var(--c-border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 24px;
+      flex-wrap: wrap;
+    }
+    .footer-id {
+      font-family: var(--font-mono);
+      font-size: 10px;
+      color: var(--c-muted);
+      letter-spacing: 0.14em;
+    }
+    .footer-id strong {
+      color: var(--c-light);
+      font-weight: 400;
+    }
+    .footer-links {
+      display: flex;
+      gap: 28px;
+    }
+    .footer-links a {
+      font-family: var(--font-mono);
+      font-size: 10px;
+      color: var(--c-muted);
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      transition: color 0.2s;
+    }
+    .footer-links a:hover { color: var(--c-near); }
+
+    /* ─── ESTATUTO ───────────────────────────────────────────── */
+    #estatuto {
+      border-bottom: 1px solid var(--c-border);
+    }
+    .estatuto-header {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 40px;
+      align-items: start;
+      margin-bottom: 52px;
+    }
+    .estatuto-meta {
+      display: flex;
+      flex-direction: column;
+      gap: 0;
+      border: 1px solid var(--c-border);
+      border-radius: var(--r);
+      overflow: hidden;
+      min-width: 240px;
+      align-self: end;
+    }
+    .est-meta-row {
+      display: flex;
+      justify-content: space-between;
+      padding: 10px 16px;
+      border-bottom: 1px solid var(--c-border);
+    }
+    .est-meta-row:last-child { border-bottom: none; }
+    .est-meta-key {
+      font-family: var(--font-mono);
+      font-size: 9px;
+      color: var(--c-muted);
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+    }
+    .est-meta-val {
+      font-family: var(--font-mono);
+      font-size: 9px;
+      color: var(--c-light);
+      letter-spacing: 0.1em;
+    }
+    .estatuto-motto {
+      font-family: var(--font-mono);
+      font-size: 13px;
+      color: var(--c-muted);
+      letter-spacing: 0.06em;
+      font-style: italic;
+      border-left: 2px solid var(--c-border-l);
+      padding-left: 20px;
+      margin-bottom: 64px;
+    }
+    .cap-block {
+      margin-bottom: 56px;
+    }
+    .cap-label {
+      font-family: var(--font-mono);
+      font-size: 10px;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--c-muted);
+      padding: 14px 0;
+      border-top: 1px solid var(--c-border);
+      border-bottom: 1px solid var(--c-border);
+      margin-bottom: 0;
+    }
+    .artigos-list {}
+    .artigo-item {
+      display: grid;
+      grid-template-columns: 80px 1fr;
+      gap: 0;
+      border-bottom: 1px solid var(--c-border);
+    }
+    .artigo-anexo {
+      background: rgba(255,255,255,0.018);
+    }
+    .artigo-num {
+      font-family: var(--font-mono);
+      font-size: 10px;
+      color: var(--c-muted);
+      letter-spacing: 0.1em;
+      padding: 24px 0;
+      padding-right: 24px;
+      border-right: 1px solid var(--c-border);
+      display: flex;
+      align-items: flex-start;
+    }
+    .artigo-body {
+      padding: 24px 0 24px 28px;
+    }
+    .artigo-title {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--c-white);
+      letter-spacing: -0.01em;
+      margin-bottom: 10px;
+    }
+    .artigo-body p {
+      font-size: 13px;
+      color: var(--c-mid);
+      line-height: 1.75;
+    }
+    .artigo-items {
+      list-style: none;
+      margin-top: 10px;
+    }
+    .artigo-items li {
+      font-family: var(--font-mono);
+      font-size: 12px;
+      color: var(--c-muted);
+      padding: 6px 0 6px 14px;
+      border-left: 1px solid var(--c-border-l);
+      margin-top: 6px;
+      line-height: 1.6;
+    }
+    .artigo-items li strong { color: var(--c-mid); font-weight: 500; }
+    .penalidade {
+      font-family: var(--font-mono);
+      font-size: 10px;
+      color: var(--c-muted);
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      margin-top: 14px;
+      padding-top: 10px;
+      border-top: 1px solid var(--c-border);
+    }
+    .penalidade-note {
+      font-family: var(--font-mono);
+      font-size: 10px;
+      color: var(--c-muted);
+      letter-spacing: 0.06em;
+      margin-top: 10px;
+      font-style: italic;
+    }
+    /* Infrações grid */
+    .infrações-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 1px;
+      background: var(--c-border);
+      border: 1px solid var(--c-border);
+      border-radius: var(--r);
+      overflow: hidden;
+      margin-top: 24px;
+    }
+    .infracao-card {
+      background: var(--c-card);
+      padding: 24px 20px;
+    }
+    .infracao-gravissima { background: #141414; }
+    .infracao-nivel {
+      font-family: var(--font-mono);
+      font-size: 9px;
+      letter-spacing: 0.22em;
+      text-transform: uppercase;
+      color: var(--c-muted);
+      margin-bottom: 14px;
+    }
+    .infracao-gravissima .infracao-nivel { color: var(--c-light); }
+    .infracao-desc {
+      font-size: 13px;
+      color: var(--c-mid);
+      line-height: 1.6;
+    }
+    .infracao-gravissima .infracao-desc { color: var(--c-near); }
+    /* Estatuto footer */
+    .estatuto-footer-note {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 12px;
+      margin-top: 48px;
+      padding-top: 24px;
+      border-top: 1px solid var(--c-border);
+    }
+    .estatuto-footer-note span {
+      font-family: var(--font-mono);
+      font-size: 10px;
+      color: var(--c-muted);
+      letter-spacing: 0.1em;
+    }
+
+    /* ─── NAV PROGRESS BAR ───────────────────────────────────── */
+    #nav-progress {
+      position: fixed;
+      top: var(--nav-h);
+      left: 0;
+      height: 2px;
+      background: var(--c-white);
+      width: 0%;
+      z-index: 101;
+      transition: width 0.1s linear;
+      opacity: 0.6;
+    }
+
+    /* Nav active link */
+    .nav-links a.nav-active { color: var(--c-white); }
+
+    /* ─── NOTÍCIAS ───────────────────────────────────────────── */
+    #noticias {
+      border-bottom: 1px solid var(--c-border);
+    }
+    .noticias-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 1px;
+      background: var(--c-border);
+      border: 1px solid var(--c-border);
+      border-radius: var(--r);
+      overflow: hidden;
+    }
+    .noticia-card {
+      background: var(--c-card);
+      padding: clamp(24px, 3vw, 36px);
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      transition: background 0.25s;
+      position: relative;
+    }
+    .noticia-card:hover { background: #1a1a1a; }
+    .noticia-tag {
+      font-family: var(--font-mono);
+      font-size: 9px;
+      letter-spacing: 0.22em;
+      text-transform: uppercase;
+      padding: 4px 8px;
+      border-radius: 2px;
+      border: 1px solid var(--c-border-l);
+      color: var(--c-muted);
+      width: fit-content;
+    }
+    .noticia-tag.decreto   { color: #fde68a; border-color: #fde68a30; background: #fde68a06; }
+    .noticia-tag.alerta    { color: #fca5a5; border-color: #fca5a530; background: #fca5a506; }
+    .noticia-tag.comunicado{ color: #93c5fd; border-color: #93c5fd30; background: #93c5fd06; }
+    .noticia-tag.eleicao   { color: #c4b5fd; border-color: #c4b5fd30; background: #c4b5fd06; }
+    .noticia-titulo {
+      font-size: clamp(15px, 1.6vw, 18px);
+      font-weight: 600;
+      color: var(--c-white);
+      letter-spacing: -0.01em;
+      line-height: 1.3;
+    }
+    .noticia-corpo {
+      font-size: 13px;
+      color: var(--c-mid);
+      line-height: 1.75;
+      flex: 1;
+    }
+    .noticia-footer {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding-top: 16px;
+      border-top: 1px solid var(--c-border);
+    }
+    .noticia-data {
+      font-family: var(--font-mono);
+      font-size: 9px;
+      color: var(--c-muted);
+      letter-spacing: 0.12em;
+    }
+    .noticia-autor {
+      font-family: var(--font-mono);
+      font-size: 9px;
+      color: var(--c-muted);
+      letter-spacing: 0.08em;
+    }
+    .noticia-destaque {
+      grid-column: span 3;
+      background: var(--c-surface);
+      border-bottom: 1px solid var(--c-border);
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0;
+    }
+    .noticia-destaque-left {
+      padding: clamp(28px, 4vw, 48px);
+      border-right: 1px solid var(--c-border);
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+    .noticia-destaque-right {
+      padding: clamp(28px, 4vw, 48px);
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      justify-content: center;
+    }
+    .noticia-destaque-label {
+      font-family: var(--font-mono);
+      font-size: 9px;
+      color: var(--c-muted);
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      margin-bottom: 4px;
+    }
+    .noticia-destaque-titulo {
+      font-size: clamp(18px, 2.5vw, 28px);
+      font-weight: 700;
+      color: var(--c-white);
+      letter-spacing: -0.02em;
+      line-height: 1.2;
+    }
+    .noticia-destaque-corpo {
+      font-size: 14px;
+      color: var(--c-mid);
+      line-height: 1.75;
+    }
+    .nd-meta-row {
+      display: flex;
+      justify-content: space-between;
+      padding: 8px 0;
+      border-bottom: 1px solid var(--c-border);
+    }
+    .nd-meta-row:last-child { border-bottom: none; }
+    .nd-meta-key {
+      font-family: var(--font-mono);
+      font-size: 9px;
+      color: var(--c-muted);
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+    }
+    .nd-meta-val {
+      font-family: var(--font-mono);
+      font-size: 9px;
+      color: var(--c-light);
+      letter-spacing: 0.06em;
+    }
+    @media (max-width: 900px) {
+      .noticias-grid { grid-template-columns: 1fr; }
+      .noticia-destaque { grid-column: 1; grid-template-columns: 1fr; }
+      .noticia-destaque-left { border-right: none; border-bottom: 1px solid var(--c-border); }
+    }
+
+    /* ─── PROCESSOS COUNTER ──────────────────────────────────── */
+    .proc-counter {
+      display: flex;
+      gap: 1px;
+      background: var(--c-border);
+      border: 1px solid var(--c-border);
+      border-radius: var(--r);
+      overflow: hidden;
+      margin-bottom: 48px;
+    }
+    .proc-counter-item {
+      background: var(--c-card);
+      padding: 16px 24px;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+    .proc-counter-num {
+      font-family: var(--font-mono);
+      font-size: clamp(20px, 3vw, 28px);
+      font-weight: 300;
+      color: var(--c-white);
+      letter-spacing: -0.03em;
+    }
+    .proc-counter-label {
+      font-family: var(--font-mono);
+      font-size: 9px;
+      color: var(--c-muted);
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+    }
+    .proc-counter-item.resolvido .proc-counter-num { color: #6ee7b7; }
+    .proc-counter-item.inocente  .proc-counter-num { color: #93c5fd; }
+    .proc-counter-item.condenado .proc-counter-num { color: #fca5a5; }
+
+    /* Proc date field */
+    .proc-accordion-trigger { grid-template-columns: 90px 70px 70px 1fr auto; }
+    .proc-date {
+      font-family: var(--font-mono);
+      font-size: 9px;
+      color: var(--c-muted);
+      letter-spacing: 0.08em;
+    }
+
+    /* Search bar */
+    .proc-search-wrap {
+      margin-bottom: 28px;
+      position: relative;
+    }
+    .proc-search {
+      width: 100%;
+      background: var(--c-card);
+      border: 1px solid var(--c-border);
+      border-radius: var(--r);
+      color: var(--c-near);
+      font-family: var(--font-mono);
+      font-size: 12px;
+      letter-spacing: 0.06em;
+      padding: 14px 16px 14px 42px;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+    .proc-search:focus { border-color: var(--c-mid); }
+    .proc-search::placeholder { color: var(--c-muted); }
+    .proc-search-icon {
+      position: absolute;
+      left: 14px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--c-muted);
+      pointer-events: none;
+    }
+    .proc-no-results {
+      display: none;
+      font-family: var(--font-mono);
+      font-size: 11px;
+      color: var(--c-muted);
+      letter-spacing: 0.1em;
+      padding: 40px 0;
+      text-align: center;
+      border-top: 1px solid var(--c-border);
+    }
+
+    /* Share button */
+    .proc-share-btn {
+      font-family: var(--font-mono);
+      font-size: 9px;
+      color: var(--c-muted);
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      padding: 5px 10px;
+      border: 1px solid var(--c-border);
+      border-radius: 2px;
+      cursor: pointer;
+      transition: color 0.2s, border-color 0.2s;
+      background: none;
+      margin-top: 12px;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .proc-share-btn:hover { color: var(--c-light); border-color: var(--c-mid); }
+    .proc-share-btn.copied { color: #6ee7b7; border-color: #6ee7b740; }
+
+    /* ─── ESTATUTO — CHAPTER TABS ────────────────────────────── */
+    .est-tabs-nav {
+      display: flex;
+      border-bottom: 1px solid var(--c-border);
+      margin-bottom: 0;
+      overflow-x: auto;
+      scrollbar-width: none;
+      margin-top: 48px;
+    }
+    .est-tabs-nav::-webkit-scrollbar { display: none; }
+    .est-tab-btn {
+      font-family: var(--font-mono);
+      font-size: 9px;
+      font-weight: 400;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+      color: var(--c-muted);
+      padding: 14px 20px;
+      border-bottom: 2px solid transparent;
+      transition: color 0.2s, border-color 0.2s;
+      white-space: nowrap;
+      flex-shrink: 0;
+      cursor: pointer;
+      background: none;
+      border-top: none; border-left: none; border-right: none;
+    }
+    .est-tab-btn.active { color: var(--c-white); border-bottom-color: var(--c-white); }
+    .est-tab-btn:hover:not(.active) { color: var(--c-light); }
+    .est-tab-panel { display: none; padding-top: 40px; animation: fadeIn 0.18s var(--ease); }
+    .est-tab-panel.active { display: block; }
+
+    @media (max-width: 640px) {
+      .proc-accordion-trigger { grid-template-columns: 70px 60px 1fr auto; gap: 10px; }
+      .proc-date { display: none; }
+      .proc-counter { flex-direction: column; }
+    }
+
+    #processos {
+      border-bottom: 1px solid var(--c-border);
+    }
+    .processos-tabs-nav {
+      display: flex;
+      border-bottom: 1px solid var(--c-border);
+      margin-bottom: 0;
+      overflow-x: auto;
+      scrollbar-width: none;
+    }
+    .processos-tabs-nav::-webkit-scrollbar { display: none; }
+    .proc-tab-btn {
+      font-family: var(--font-mono);
+      font-size: 10px;
+      font-weight: 400;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--c-muted);
+      padding: 18px 28px;
+      border-bottom: 2px solid transparent;
+      transition: color 0.2s, border-color 0.2s;
+      white-space: nowrap;
+      flex-shrink: 0;
+      cursor: pointer;
+      font-family: var(--font-mono);
+      background: none;
+      border-top: none;
+      border-left: none;
+      border-right: none;
+    }
+    .proc-tab-btn.active {
+      color: var(--c-white);
+      border-bottom-color: var(--c-white);
+    }
+    .proc-tab-btn:hover:not(.active) { color: var(--c-light); }
+    .proc-tabs-body { padding-top: 52px; }
+    .proc-tab-panel { display: none; animation: fadeIn 0.18s var(--ease); }
+    .proc-tab-panel.active { display: block; }
+
+    /* Processo accordion */
+    .proc-accordion-list {}
+    .proc-accordion-item {
+      border-bottom: 1px solid var(--c-border);
+    }
+    .proc-accordion-item:first-child { border-top: 1px solid var(--c-border); }
+    .proc-accordion-trigger {
+      width: 100%;
+      display: grid;
+      grid-template-columns: 90px 60px 1fr auto;
+      align-items: center;
+      gap: 24px;
+      padding: 28px 0;
+      text-align: left;
+      cursor: pointer;
+      background: none;
+      border: none;
+      transition: opacity 0.2s;
+      font-family: var(--font-display);
+    }
+    .proc-accordion-trigger:hover { opacity: 0.75; }
+    .proc-num {
+      font-family: var(--font-mono);
+      font-size: 10px;
+      color: var(--c-muted);
+      letter-spacing: 0.1em;
+    }
+    .proc-status {
+      font-family: var(--font-mono);
+      font-size: 9px;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      padding: 4px 8px;
+      border-radius: 2px;
+      background: rgba(255,255,255,0.05);
+      color: var(--c-muted);
+      border: 1px solid var(--c-border-l);
+      white-space: nowrap;
+    }
+    .proc-status.resolvido { color: #6ee7b7; border-color: #6ee7b730; background: #6ee7b708; }
+    .proc-status.inocente  { color: #93c5fd; border-color: #93c5fd30; background: #93c5fd08; }
+    .proc-status.condenado { color: #fca5a5; border-color: #fca5a530; background: #fca5a508; }
+    .proc-title {
+      font-size: clamp(14px, 1.5vw, 17px);
+      font-weight: 500;
+      color: var(--c-near);
+      letter-spacing: -0.01em;
+    }
+    .proc-icon {
+      width: 20px;
+      height: 20px;
+      border: 1px solid var(--c-border-l);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      transition: transform 0.3s var(--ease), border-color 0.2s;
+    }
+    .proc-icon svg { transition: transform 0.3s var(--ease); }
+    .proc-accordion-item.open .proc-icon { border-color: var(--c-mid); }
+    .proc-accordion-item.open .proc-icon svg { transform: rotate(45deg); }
+    .proc-accordion-body {
+      display: grid;
+      grid-template-rows: 0fr;
+      transition: grid-template-rows 0.32s var(--ease);
+    }
+    .proc-accordion-item.open .proc-accordion-body { grid-template-rows: 1fr; }
+    .proc-accordion-inner { overflow: hidden; }
+    .proc-content {
+      padding: 0 0 36px 174px;
+      max-width: 800px;
+    }
+    .proc-section {
+      margin-bottom: 20px;
+    }
+    .proc-section-title {
+      font-family: var(--font-mono);
+      font-size: 9px;
+      letter-spacing: 0.22em;
+      text-transform: uppercase;
+      color: var(--c-muted);
+      margin-bottom: 10px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .proc-section-title::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: var(--c-border);
+    }
+    .proc-section p {
+      font-size: 13px;
+      color: var(--c-mid);
+      line-height: 1.8;
+      margin-bottom: 10px;
+    }
+    .proc-section p:last-child { margin-bottom: 0; }
+    .proc-veredicto {
+      font-family: var(--font-mono);
+      font-size: 10px;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      padding: 12px 16px;
+      border-radius: var(--r);
+      border: 1px solid var(--c-border-l);
+      color: var(--c-muted);
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      margin-top: 12px;
+    }
+    .proc-veredicto::before {
+      content: '';
+      width: 6px; height: 6px;
+      border-radius: 50%;
+      background: var(--c-muted);
+      flex-shrink: 0;
+    }
+    .proc-veredicto.resolvido { color: #6ee7b7; border-color: #6ee7b730; }
+    .proc-veredicto.resolvido::before { background: #6ee7b7; }
+    .proc-veredicto.inocente  { color: #93c5fd; border-color: #93c5fd30; }
+    .proc-veredicto.inocente::before  { background: #93c5fd; }
+    .proc-veredicto.condenado { color: #fca5a5; border-color: #fca5a530; }
+    .proc-veredicto.condenado::before { background: #fca5a5; }
+
+    .proc-assinatura {
+      font-family: var(--font-mono);
+      font-size: 9px;
+      color: var(--c-muted);
+      letter-spacing: 0.1em;
+      margin-top: 20px;
+      padding-top: 16px;
+      border-top: 1px solid var(--c-border);
+      opacity: 0.6;
+    }
+
+    @media (max-width: 640px) {
+      .proc-accordion-trigger { grid-template-columns: 70px 1fr auto; gap: 12px; }
+      .proc-status { display: none; }
+      .proc-content { padding-left: 0; }
+    }
+
+    /* ─── RESPONSIVE ─────────────────────────────────────────── */
+    @media (max-width: 900px) {
+      .pilares-header { grid-template-columns: 1fr; }
+      .pilares-desc { justify-self: start; }
+      .pilares-grid { grid-template-columns: 1fr; }
+      .tab-panel.active { grid-template-columns: 1fr; }
+      .tab-data { display: none; }
+      .cupula-grid { grid-template-columns: 1fr; }
+      .estatuto-header { grid-template-columns: 1fr; }
+      .infrações-grid { grid-template-columns: repeat(2, 1fr); }
+    }
+    @media (max-width: 640px) {
+      .nav-links { display: none; }
+      h1 { letter-spacing: -0.02em; }
+      .hero-metrics { grid-template-columns: 1fr; }
+      .metric { border-right: none; border-bottom: 1px solid var(--c-border); padding-left: 0 !important; }
+      .metric:last-child { border-bottom: none; }
+      .accordion-trigger { grid-template-columns: 80px 1fr auto; gap: 12px; }
+      .accordion-inner p { padding-left: 0; }
+      .artigo-item { grid-template-columns: 60px 1fr; }
+      .artigo-body { padding-left: 16px; }
+      .infrações-grid { grid-template-columns: 1fr; }
+      .estatuto-footer-note { flex-direction: column; gap: 6px; }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      * { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
+    }
+  </style>
+</head>
+<body>
+
+<canvas id="bg-canvas"></canvas>
+
+<div id="nav-progress"></div>
+
+<div class="site-wrap">
+
+  <!-- NAV -->
+  <nav>
+    <div class="nav-logo">
+      <span>▲</span>MTN
+    </div>
+    <ul class="nav-links">
+      <li><a href="#pilares">Pilares</a></li>
+      <li><a href="#estrutura">Estrutura</a></li>
+      <li><a href="#noticias">Notícias</a></li>
+      <li><a href="#processos">Processos</a></li>
+      <li><a href="#estatuto">Estatuto</a></li>
+      <li><a href="#historico">Histórico</a></li>
+      <li><a href="#cupula">Cúpula</a></li>
+    </ul>
+    <a href="https://discord.gg/vWJtEDxZX" target="_blank" class="nav-cta">Acessar</a>
+  </nav>
+
+  <!-- HERO -->
+  <section id="hero">
+    <div class="hero-content">
+      <div class="hero-eyebrow">EB Delta — Sistema Político Ativo</div>
+      <h1>Movimento<br><em>Tático</em><br>Nacional</h1>
+      <p class="hero-sub">
+        Governança blindada, hierarquia estruturada e gestão estratégica aplicada ao simulador do Exército Brasileiro no Roblox.
+      </p>
+      <div class="hero-actions">
+        <a href="https://discord.gg/vWJtEDxZX" target="_blank" class="btn-solid">
+          Conhecer Estrutura
+          <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M2 6h8M6 2l4 4-4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </a>
+        <a href="https://discord.gg/vWJtEDxZX" target="_blank" class="btn-outline">Ver Histórico</a>
+      </div>
+    </div>
+
+    <div class="hero-metrics">
+      <div class="metric">
+        <div class="metric-num">400<span style="font-size:0.5em;color:var(--c-muted)">+</span></div>
+        <div class="metric-label">Membros Cadastrados</div>
+      </div>
+      <div class="metric">
+        <div class="metric-num">21</div>
+        <div class="metric-label">Artigos em Vigor</div>
+      </div>
+      <div class="metric">
+        <div class="metric-num">400<span style="font-size:0.5em;color:var(--c-muted)">+</span></div>
+        <div class="metric-label">Eleitores Estimados</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- PILARES -->
+  <section id="pilares">
+    <div class="label">Diretrizes Fundamentais</div>
+    <div class="pilares-header">
+      <h2>Os Quatro<br>Pilares</h2>
+      <p class="pilares-desc">
+        Cada pilar é uma diretriz operacional irrevogável que sustenta a arquitetura de governança do movimento.
+      </p>
+    </div>
+    <div class="pilares-grid">
+      <div class="pilar-card">
+        <div class="pilar-glyph">PILAR — I</div>
+        <h3>Ordem Jurídica Integrada</h3>
+        <p>Estatuto digital unificado com código penal estruturado e progressão automática de sanções conforme a gravidade da infração.</p>
+      </div>
+      <div class="pilar-card">
+        <div class="pilar-glyph">PILAR — II</div>
+        <h3>Cadeia de Comando Estrita</h3>
+        <p>Alinhamento vertical absoluto entre a Alta Cúpula, Secretaria Geral e os agentes operacionais de campo.</p>
+      </div>
+      <div class="pilar-card">
+        <div class="pilar-glyph">PILAR — III</div>
+        <h3>Mobilização Algorítmica</h3>
+        <p>Engenharia política focada no engajamento de mais de 1.000 eleitores ativos no servidor, com controle de votos consolidados.</p>
+      </div>
+      <div class="pilar-card">
+        <div class="pilar-glyph">PILAR — IV</div>
+        <h3>Contramedidas de Crise</h3>
+        <p>Protocolos de supressão a motins, quebras de integridade e auditorias permanentes conduzidas pela SGTN.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ESTRUTURA (TABS) -->
+  <section id="estrutura">
+    <div class="label">Arquitetura Interna</div>
+    <h2 style="margin-bottom:48px">Estrutura<br>Operacional</h2>
+
+    <div class="tabs-nav">
+      <button class="tab-btn active" data-tab="sgtn">SGTN</button>
+      <button class="tab-btn" data-tab="stm">STM</button>
+      <button class="tab-btn" data-tab="epd">EPD</button>
+      <button class="tab-btn" data-tab="jornal">Jornal</button>
+      <button class="tab-btn" data-tab="conduta">Conduta</button>
+      <button class="tab-btn" data-tab="sancoes">Sanções</button>
+    </div>
+
+    <div class="tabs-body">
+
+      <div class="tab-panel active" id="tab-sgtn">
+        <div class="tab-panel-info">
+          <h3>Secretaria Geral Tática Nacional</h3>
+          <p>Órgão central de soberania administrativa do MTN. Conduz auditorias sistêmicas, controle de dados operacionais e aplicações correcionais em tempo real.</p>
+          <p>Todos os comandantes de clãs e famílias respondem diretamente à SGTN, que retém autoridade irrevogável sobre a estrutura interna.</p>
+        </div>
+        <div class="tab-data">
+          <div class="tab-data-header">SGTN <span>//</span> PARÂMETROS</div>
+          <div class="tab-data-body">
+            <div class="data-row"><span class="data-key">STATUS</span><span class="data-val">OPERACIONAL</span></div>
+            <div class="data-row"><span class="data-key">AUTORIDADE</span><span class="data-val">SUPREMA</span></div>
+            <div class="data-row"><span class="data-key">FUNÇÃO</span><span class="data-val">AUDITORIA / CONTROLE</span></div>
+            <div class="data-row"><span class="data-key">RESPONDE_A</span><span class="data-val">ALTA CÚPULA</span></div>
+            <div class="data-row"><span class="data-key">ESCOPO</span><span class="data-val">CORREÇÃO EM TEMPO REAL</span></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="tab-panel" id="tab-stm">
+        <div class="tab-panel-info">
+          <h3>Supremo Tribunal Militar</h3>
+          <p>Instância de julgamento responsável por casos de alta complexidade, julgamentos formais e auditorias de atos de insubordinação graves contra a hierarquia.</p>
+          <p>O STM é a última instância recursal e seus veredictos são irrevogáveis dentro da estrutura do movimento.</p>
+        </div>
+        <div class="tab-data">
+          <div class="tab-data-header">STM <span>//</span> PARÂMETROS</div>
+          <div class="tab-data-body">
+            <div class="data-row"><span class="data-key">STATUS</span><span class="data-val">ATIVO</span></div>
+            <div class="data-row"><span class="data-key">TIPO</span><span class="data-val">TRIBUNAL FORMAL</span></div>
+            <div class="data-row"><span class="data-key">ESCOPO</span><span class="data-val">CASOS COMPLEXOS</span></div>
+            <div class="data-row"><span class="data-key">VEREDICTO</span><span class="data-val">IRREVOGÁVEL</span></div>
+            <div class="data-row"><span class="data-key">RECURSO</span><span class="data-val">INSTÂNCIA FINAL</span></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="tab-panel" id="tab-epd">
+        <div class="tab-panel-info">
+          <h3>Equipe de Design</h3>
+          <p>A EPD — Equipe de Produção e Design — é o braço criativo e visual do MTN. Responsável pela identidade gráfica, comunicação institucional e produção de materiais oficiais do movimento.</p>
+          <p>A EPD atua em coordenação direta com a SGTN para garantir que toda comunicação externa e interna reflita os padrões institucionais do MTN com precisão e consistência.</p>
+        </div>
+        <div class="tab-data">
+          <div class="tab-data-header">EPD <span>//</span> PARÂMETROS</div>
+          <div class="tab-data-body">
+            <div class="data-row"><span class="data-key">STATUS</span><span class="data-val">ATIVO</span></div>
+            <div class="data-row"><span class="data-key">TIPO</span><span class="data-val">DIVISÃO CRIATIVA</span></div>
+            <div class="data-row"><span class="data-key">ESCOPO</span><span class="data-val">DESIGN / IDENTIDADE</span></div>
+            <div class="data-row"><span class="data-key">COORDENA_COM</span><span class="data-val">SGTN</span></div>
+            <div class="data-row"><span class="data-key">OUTPUT</span><span class="data-val">MATERIAIS OFICIAIS</span></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="tab-panel" id="tab-jornal">
+        <div class="tab-panel-info">
+          <h3>Jornal MTN</h3>
+          <p>O Jornal é o veículo oficial de comunicação e imprensa interna do MTN. Registra eventos, publica comunicados institucionais, cobre eleições e documenta decisões relevantes da cúpula.</p>
+          <p>Opera com independência editorial dentro dos parâmetros institucionais, funcionando como arquivo histórico e canal de transparência para os membros do movimento.</p>
+        </div>
+        <div class="tab-data">
+          <div class="tab-data-header">JORNAL <span>//</span> PARÂMETROS</div>
+          <div class="tab-data-body">
+            <div class="data-row"><span class="data-key">STATUS</span><span class="data-val">ATIVO</span></div>
+            <div class="data-row"><span class="data-key">TIPO</span><span class="data-val">IMPRENSA OFICIAL</span></div>
+            <div class="data-row"><span class="data-key">ESCOPO</span><span class="data-val">COBERTURA INTERNA</span></div>
+            <div class="data-row"><span class="data-key">FUNÇÃO</span><span class="data-val">ARQUIVO / COMUNICADO</span></div>
+            <div class="data-row"><span class="data-key">EDITORIAL</span><span class="data-val">INDEPENDENTE</span></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="tab-panel" id="tab-conduta">
+        <div class="tab-panel-info">
+          <h3>Código de Conduta</h3>
+          <p>O estatuto exige alto padrão de civilidade e respeito irrestrito à cadeia hierárquica. Infrações leves como spam ou flood geram mutes imediatos.</p>
+          <p>Insubordinação ou postura hostil dispara protocolo escalonado: advertência formal, suspensão e exclusão de patentes. Alegar desconhecimento das normas não exime punição.</p>
+        </div>
+        <div class="tab-data">
+          <div class="tab-data-header">CONDUTA <span>//</span> ESCALA</div>
+          <div class="tab-data-body">
+            <div class="data-row"><span class="data-key">NÍVEL_01</span><span class="data-val">MUTE TEMPORÁRIO</span></div>
+            <div class="data-row"><span class="data-key">NÍVEL_02</span><span class="data-val">ADVERTÊNCIA FORMAL</span></div>
+            <div class="data-row"><span class="data-key">NÍVEL_03</span><span class="data-val">SUSPENSÃO DE ACESSO</span></div>
+            <div class="data-row"><span class="data-key">NÍVEL_04</span><span class="data-val">EXCLUSÃO DE PATENTE</span></div>
+            <div class="data-row"><span class="data-key">NÍVEL_05</span><span class="data-val">EXÍLIO DEFINITIVO</span></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="tab-panel" id="tab-sancoes">
+        <div class="tab-panel-info">
+          <h3>Sistema de Sanções</h3>
+          <p>O acúmulo de 3 advertências gera rebaixamento automático de cargo. Com 4 advertências, todos os acessos corporativos são suspensos integralmente.</p>
+          <p>Crimes graves — alta traição, conluio com rivais, vazamento de dados confidenciais — resultam em banimento permanente e perda total de patentes.</p>
+        </div>
+        <div class="tab-data">
+          <div class="tab-data-header">SANÇÕES <span>//</span> GATILHOS</div>
+          <div class="tab-data-body">
+            <div class="data-row"><span class="data-key">3 ADVERTÊNCIAS</span><span class="data-val">DOWNGRADE AUTO.</span></div>
+            <div class="data-row"><span class="data-key">4 ADVERTÊNCIAS</span><span class="data-val">ACESSO SUSPENSO</span></div>
+            <div class="data-row"><span class="data-key">TRAIÇÃO</span><span class="data-val">BANIMENTO PERMANENTE</span></div>
+            <div class="data-row"><span class="data-key">FRAUDE ELEITORAL</span><span class="data-val">EXÍLIO + PERDA PATENTE</span></div>
+            <div class="data-row"><span class="data-key">VAZAMENTO</span><span class="data-val">JULGAMENTO STM</span></div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- HISTÓRICO (ACCORDION) -->
+  <section id="historico">
+    <div class="label">Registro de Eventos</div>
+    <h2 style="margin-bottom:64px">Histórico<br>Político</h2>
+
+    <div class="accordion-list">
+
+      <div class="accordion-item">
+        <button class="accordion-trigger" aria-expanded="false">
+          <span class="acc-date">JUN 2026</span>
+          <span class="acc-title">8º Concurso CGEx — 14 Estagiários Aprovados</span>
+          <span class="acc-icon">
+            <svg width="10" height="10" viewBox="0 0 10 10" fill="none">
+              <path d="M5 1v8M1 5h8" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/>
+            </svg>
+          </span>
+        </button>
+        <div class="accordion-body">
+          <div class="accordion-inner">
+            <p>A Corregedoria Geral do Exército divulgou o resultado do 8º Processo Seletivo para ingresso na carreira de Corregedor. Das 30 vagas abertas (15 imediatas + 15 reserva), 14 candidatos foram aprovados para a fase de estágios: mikszagiovana, Davidvhne, Zezedecamargo1945, contanum5bl, LINDO8biel8LINDO, SammyDemonn, Bela167_what, raul_cola, DeyvisonH129, applefbr, Theus1507, vmilusao, gcaui22 e RDZyMgtz. Os aprovados tiveram até 00h00 do dia do resultado para abrir ticket e dar continuidade à segunda fase do concurso.</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="accordion-item">
+        <button class="accordion-trigger" aria-expanded="false">
+          <span class="acc-date">24–27 JUN 2026</span>
+          <span class="acc-title">8º Concurso Público — Corregedoria Geral do Exército (CGEx)</span>
+          <span class="acc-icon">
+            <svg width="10" height="10" viewBox="0 0 10 10" fill="none">
+              <path d="M5 1v8M1 5h8" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/>
+            </svg>
+          </span>
+        </button>
+        <div class="accordion-body">
+          <div class="accordion-inner">
+            <p>A Corregedoria Geral do Exército — responsável pela disciplina, fiscalização e conduta dos integrantes do EB Delta — abriu inscrições para seu 8º Concurso Público entre 24/06 e 27/06/2026. Foram disponibilizadas 30 vagas: 15 para aprovação imediata e 15 para cadastro de reserva. A correção foi realizada por análise interna.</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="accordion-item">
+        <button class="accordion-trigger" aria-expanded="false">
+          <span class="acc-date">JUN 2026</span>
+          <span class="acc-title">3º Concurso DFG-Ex — Resultado: 10 Aprovados e 5 Reservas</span>
+          <span class="acc-icon">
+            <svg width="10" height="10" viewBox="0 0 10 10" fill="none">
+              <path d="M5 1v8M1 5h8" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/>
+            </svg>
+          </span>
+        </button>
+        <div class="accordion-body">
+          <div class="accordion-inner">
+            <p>A Defensoria-Geral do Exército publicou o resultado do 3º Concurso Oficial. Os 10 aprovados foram, em ordem: vermelhin_60, Ghost_Rider, .panic._0, .spicyx., joutinhaefi, bth_h, Vitinxs7s, Ghosttt6245, thomasjj09 e v.motta. O cadastro de reserva ficou com SOUZAH777VG, Tatehaley15, dog_dela_s_, migueltrem666 e SaborDelt4. Aprovados tiveram 24 horas para contatar o Defensor-Geral, sob pena de perda da vaga.</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="accordion-item">
+        <button class="accordion-trigger" aria-expanded="false">
+          <span class="acc-date">19–23 JUN 2026</span>
+          <span class="acc-title">3º Concurso Oficial da Defensoria-Geral do Exército (DFG-Ex)</span>
+          <span class="acc-icon">
+            <svg width="10" height="10" viewBox="0 0 10 10" fill="none">
+              <path d="M5 1v8M1 5h8" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/>
+            </svg>
+          </span>
+        </button>
+        <div class="accordion-body">
+          <div class="accordion-inner">
+            <p>A Defensoria-Geral do Exército abriu inscrições para seu 3º Concurso Oficial entre 19/06 e 23/06/2026, destinado ao recrutamento de militares para a equipe de defesa jurídica, disciplinar e administrativa. Foram oferecidas até 10 vagas de aprovação imediata e 5 vagas de cadastro de reserva. O uso de Inteligência Artificial ou qualquer auxílio externo durante a avaliação resultaria em desclassificação imediata.</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="accordion-item">
+        <button class="accordion-trigger" aria-expanded="false">
+          <span class="acc-date">28 JUN 2026</span>
+          <span class="acc-title">Nomeações de Golgos — Defensor Geral e Procurador</span>
+          <span class="acc-icon">
+            <svg width="10" height="10" viewBox="0 0 10 10" fill="none">
+              <path d="M5 1v8M1 5h8" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/>
+            </svg>
+          </span>
+        </button>
+        <div class="accordion-body">
+          <div class="accordion-inner">
+            <p>Em 28 de junho de 2026, o presidente eleito Golgos formalizou seu gabinete nomeando mudinhoxy como Defensor Geral e ngc.pz como Procurador Geral do Exército. O MTN monitora de perto as movimentações e se mantém em mobilização para a próxima eleição presidencial.</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="accordion-item">
+        <button class="accordion-trigger" aria-expanded="false">
+          <span class="acc-date">12 JUN 2026</span>
+          <span class="acc-title">Eleição — Golgos eleito Presidente do EB Delta</span>
+          <span class="acc-icon">
+            <svg width="10" height="10" viewBox="0 0 10 10" fill="none">
+              <path d="M5 1v8M1 5h8" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/>
+            </svg>
+          </span>
+        </button>
+        <div class="accordion-body">
+          <div class="accordion-inner">
+            <p>Em 12 de junho de 2026, o candidato Golgos venceu as eleições e foi empossado como Presidente do EB Delta. O MTN mantém mobilização ativa para a próxima disputa, estimando o controle de mais de 400 votos consolidados para eleger Joe como candidato oficial da cúpula.</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="accordion-item">
+        <button class="accordion-trigger" aria-expanded="false">
+          <span class="acc-date">01 MAR 2026</span>
+          <span class="acc-title">Destituição de Kiki — Caso Free Patente</span>
+          <span class="acc-icon">
+            <svg width="10" height="10" viewBox="0 0 10 10" fill="none">
+              <path d="M5 1v8M1 5h8" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/>
+            </svg>
+          </span>
+        </button>
+        <div class="accordion-body">
+          <div class="accordion-inner">
+            <p>Em 1º de março de 2026, o ex-mandatário Kiki foi destituído via Corregedoria por praticar "Free Patente" — concessão irregular de patentes militares sem mérito comprovado. O MTN utiliza este caso como justificativa canônica para a necessidade de auditorias permanentes conduzidas pela SGTN.</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="accordion-item">
+        <button class="accordion-trigger" aria-expanded="false">
+          <span class="acc-date">2026</span>
+          <span class="acc-title">EB Delta completa 1 ano — Retorno do Sistema de Missões v6154</span>
+          <span class="acc-icon">
+            <svg width="10" height="10" viewBox="0 0 10 10" fill="none">
+              <path d="M5 1v8M1 5h8" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/>
+            </svg>
+          </span>
+        </button>
+        <div class="accordion-body">
+          <div class="accordion-inner">
+            <p>O EB Delta completou 1 ano de existência em 2026, fundado por Delta. A equipe de desenvolvimento anunciou o retorno do Sistema de Missões na atualização v6154, ampliando as possibilidades operacionais dentro do simulador e o contexto eleitoral em que o MTN atua.</p>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- CÚPULA -->
+  <section id="cupula">
+    <div class="label">Alta Liderança</div>
+    <h2 style="margin-bottom:48px">A Alta<br>Cúpula</h2>
+    <div class="cupula-grid">
+      <div class="cupula-card">
+        <div class="cupula-rank">FUNDADOR / PRESIDÊNCIA</div>
+        <div class="cupula-name">Joe</div>
+        <div class="cupula-title">Presidente<br>Representante Supremo<br>Candidato Alfa Oficial</div>
+        <div class="cupula-bg-num">01</div>
+      </div>
+      <div class="cupula-card">
+        <div class="cupula-rank">COFUNDADOR / ARQUITETURA</div>
+        <div class="cupula-name">J.</div>
+        <div class="cupula-title">Vice-Presidente<br>Arquiteto de Sistemas<br>Desenvolvimento Tecnológico</div>
+        <div class="cupula-bg-num">02</div>
+      </div>
+      <div class="cupula-card">
+        <div class="cupula-rank">COFUNDADOR / COMANDO</div>
+        <div class="cupula-name">ZP</div>
+        <div class="cupula-title">Dono Geral<br>Supremo Comandante<br>Forças Táticas</div>
+        <div class="cupula-bg-num">03</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- NOTÍCIAS / COMUNICADOS -->
+  <section id="noticias">
+    <div class="label">Central de Comunicados</div>
+    <h2 style="margin-bottom:48px">Notícias<br>Oficiais</h2>
+
+    <div class="noticias-grid">
+
+      <!-- DESTAQUE -->
+      <div class="noticia-destaque">
+        <div class="noticia-destaque-left">
+          <span class="noticia-tag eleicao">Alerta Eleitoral</span>
+          <div class="noticia-destaque-titulo">MTN em mobilização para próxima eleição presidencial do EB Delta</div>
+          <p class="noticia-destaque-corpo">Com a vitória de Golgos em 12 de junho de 2026, o Movimento Tático Nacional mantém mobilização ativa e estima o controle de mais de 400 votos consolidados para eleger Joe como candidato oficial da cúpula na próxima disputa presidencial.</p>
+          <div class="noticia-data">JUN 2026 &nbsp;·&nbsp; Alta Cúpula MTN</div>
+        </div>
+        <div class="noticia-destaque-right">
+          <div class="noticia-destaque-label">Status da Campanha</div>
+          <div class="nd-meta-row"><span class="nd-meta-key">Candidato Oficial</span><span class="nd-meta-val">Joe</span></div>
+          <div class="nd-meta-row"><span class="nd-meta-key">Votos Estimados</span><span class="nd-meta-val">400+</span></div>
+          <div class="nd-meta-row"><span class="nd-meta-key">Status</span><span class="nd-meta-val">MOBILIZAÇÃO ATIVA</span></div>
+          <div class="nd-meta-row"><span class="nd-meta-key">Fase</span><span class="nd-meta-val">PRÉ-CAMPANHA</span></div>
+          <div class="nd-meta-row"><span class="nd-meta-key">Presidente Atual</span><span class="nd-meta-val">Golgos</span></div>
+        </div>
+      </div>
+
+      <!-- CARD 1 -->
+      <div class="noticia-card">
+        <span class="noticia-tag decreto">Decreto</span>
+        <div class="noticia-titulo">Nomeações de Golgos: Defensor Geral e Procurador</div>
+        <p class="noticia-corpo">O presidente eleito Golgos formalizou seu gabinete nomeando mudinhoxy como Defensor Geral e ngc.pz como Procurador Geral do Exército. O MTN acompanha de perto as movimentações do novo governo.</p>
+        <div class="noticia-footer">
+          <span class="noticia-data">28 JUN 2026</span>
+          <span class="noticia-autor">SGTN</span>
+        </div>
+      </div>
+
+      <!-- CARD 2 -->
+      <div class="noticia-card">
+        <span class="noticia-tag comunicado">Comunicado</span>
+        <div class="noticia-titulo">8º Concurso CGEx encerrado — 14 estagiários aprovados</div>
+        <p class="noticia-corpo">A Corregedoria Geral do Exército divulgou o resultado do 8º processo seletivo. Das 30 vagas abertas, 14 candidatos foram aprovados para a fase de estágios e tiveram até 00h00 para abrir ticket.</p>
+        <div class="noticia-footer">
+          <span class="noticia-data">JUN 2026</span>
+          <span class="noticia-autor">CGEx</span>
+        </div>
+      </div>
+
+      <!-- CARD 3 -->
+      <div class="noticia-card">
+        <span class="noticia-tag alerta">Alerta</span>
+        <div class="noticia-titulo">Conduta discriminatória: Sub Criador 'Lost' processado pelo STM</div>
+        <p class="noticia-corpo">O Sub Criador 'Lost' foi levado a processo formal após manifestações de cunho discriminatório no chat-geral. O caso foi encerrado como resolvido pela Secretaria Tática Nacional.</p>
+        <div class="noticia-footer">
+          <span class="noticia-data">2026</span>
+          <span class="noticia-autor">STM</span>
+        </div>
+      </div>
+
+      <!-- CARD 4 -->
+      <div class="noticia-card">
+        <span class="noticia-tag decreto">Decreto</span>
+        <div class="noticia-titulo">EB Delta completa 1 ano — retorno do Sistema de Missões v6154</div>
+        <p class="noticia-corpo">O EB Delta celebra 1 ano de existência. A equipe de desenvolvimento anunciou o retorno do Sistema de Missões na atualização v6154, ampliando as possibilidades operacionais no simulador.</p>
+        <div class="noticia-footer">
+          <span class="noticia-data">2026</span>
+          <span class="noticia-autor">EB Delta</span>
+        </div>
+      </div>
+
+      <!-- CARD 5 -->
+      <div class="noticia-card">
+        <span class="noticia-tag alerta">Alerta</span>
+        <div class="noticia-titulo">Destituição de Kiki por "Free Patente" — caso arquivado</div>
+        <p class="noticia-corpo">Em 1º de março de 2026, o ex-mandatário Kiki foi destituído via Corregedoria por concessão irregular de patentes militares sem mérito comprovado. O caso reforça a necessidade de auditorias permanentes.</p>
+        <div class="noticia-footer">
+          <span class="noticia-data">01 MAR 2026</span>
+          <span class="noticia-autor">SGTN</span>
+        </div>
+      </div>
+
+      <!-- CARD 6 -->
+      <div class="noticia-card">
+        <span class="noticia-tag comunicado">Comunicado</span>
+        <div class="noticia-titulo">3º Concurso DFG-Ex encerrado — 10 aprovados, 5 reservas</div>
+        <p class="noticia-corpo">A Defensoria-Geral publicou o resultado do 3º concurso oficial. Os aprovados tiveram 24 horas para contato com o Defensor-Geral sob pena de perda da vaga. Uso de IA resultou em desclassificação imediata.</p>
+        <div class="noticia-footer">
+          <span class="noticia-data">JUN 2026</span>
+          <span class="noticia-autor">DFG-Ex</span>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- PROCESSOS ARQUIVADOS -->
+  <section id="processos">
+    <div class="label">Tribunal Militar</div>
+    <h2 style="margin-bottom:48px">Processos<br>Arquivados</h2>
+
+    <div class="proc-counter">
+      <div class="proc-counter-item">
+        <span class="proc-counter-num">3</span>
+        <span class="proc-counter-label">Total Arquivados</span>
+      </div>
+      <div class="proc-counter-item resolvido">
+        <span class="proc-counter-num">1</span>
+        <span class="proc-counter-label">Resolvidos</span>
+      </div>
+      <div class="proc-counter-item inocente">
+        <span class="proc-counter-num">1</span>
+        <span class="proc-counter-label">Inocência</span>
+      </div>
+      <div class="proc-counter-item condenado">
+        <span class="proc-counter-num">1</span>
+        <span class="proc-counter-label">Condenados</span>
+      </div>
+    </div>
+
+    <div class="proc-search-wrap">
+      <svg class="proc-search-icon" width="14" height="14" viewBox="0 0 14 14" fill="none">
+        <circle cx="6" cy="6" r="4.5" stroke="currentColor" stroke-width="1.2"/>
+        <path d="M9.5 9.5L13 13" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/>
+      </svg>
+      <input class="proc-search" type="text" placeholder="Buscar processo, réu ou assunto..." id="proc-search-input" />
+    </div>
+    <div class="proc-no-results" id="proc-no-results">Nenhum processo encontrado.</div>
+
+    <div class="processos-tabs-nav">
+      <button class="proc-tab-btn active" data-proc-tab="todos">Todos</button>
+      <button class="proc-tab-btn" data-proc-tab="resolvidos">Resolvidos</button>
+      <button class="proc-tab-btn" data-proc-tab="inocentes">Inocência</button>
+      <button class="proc-tab-btn" data-proc-tab="condenados">Condenados</button>
+    </div>
+
+    <div class="proc-tabs-body">
+
+      <!-- TODOS -->
+      <div class="proc-tab-panel active" id="proc-tab-todos">
+        <div class="proc-accordion-list">
+
+          <!-- PROCESSO 01 -->
+          <div class="proc-accordion-item" data-categoria="resolvido">
+            <button class="proc-accordion-trigger" aria-expanded="false">
+              <span class="proc-num">PROC. 01/00</span>
+              <span class="proc-status resolvido">Resolvido</span>
+              <span class="proc-date">2026</span>
+              <span class="proc-title">Discurso Ofensivo — Sub Criador 'Lost'</span>
+              <span class="proc-icon">
+                <svg width="10" height="10" viewBox="0 0 10 10" fill="none">
+                  <path d="M5 1v8M1 5h8" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/>
+                </svg>
+              </span>
+            </button>
+            <div class="proc-accordion-body">
+              <div class="proc-accordion-inner">
+                <div class="proc-content">
+                  <div class="proc-section">
+                    <div class="proc-section-title">Relato</div>
+                    <p>O Sub Criador 'Lost' realizou manifestações de caráter ofensivo e depreciativo direcionadas a moradores de comunidades/favelas no canal "chat-geral", utilizando expressões pejorativas e generalizações discriminatórias.</p>
+                    <p>Foram atribuídos aos referidos grupos sociais características como inutilidade, falta de futuro e ausência de contribuição social. As mensagens evidenciam discurso ofensivo de cunho social, promovendo desrespeito coletivo e incitação à hostilidade contra indivíduos em razão de sua condição social e local de origem.</p>
+                    <p>As condutas ocasionaram indignação entre os participantes da conversa e geraram intenso conflito. Conforme registrado nas capturas de tela anexadas ao processo.</p>
+                  </div>
+                  <div class="proc-veredicto resolvido">Caso Resolvido — Processo Encerrado</div>
+                  <button class="proc-share-btn" onclick="copyProcLink(this, 'proc-01')">
+                    <svg width="10" height="10" viewBox="0 0 10 10" fill="none"><path d="M7 1H9V3M9 1L5 5M4 2H2V8H8V6" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                    Copiar link
+                  </button>
+                  <div class="proc-assinatura">Secretaria Tática Nacional / Alto Escalão / Tribunal Militar</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- PROCESSO 02 -->
+          <div class="proc-accordion-item" data-categoria="inocente">
+            <button class="proc-accordion-trigger" aria-expanded="false">
+              <span class="proc-num">PROC. 02/00</span>
+              <span class="proc-status inocente">Inocência</span>
+              <span class="proc-date">2026</span>
+              <span class="proc-title">Ofensa Indireta — Réu J.</span>
+              <span class="proc-icon">
+                <svg width="10" height="10" viewBox="0 0 10 10" fill="none">
+                  <path d="M5 1v8M1 5h8" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/>
+                </svg>
+              </span>
+            </button>
+            <div class="proc-accordion-body">
+              <div class="proc-accordion-inner">
+                <div class="proc-content">
+                  <div class="proc-section">
+                    <div class="proc-section-title">Análise do Caso</div>
+                    <p>O áudio apresentado foi o início do contexto, dando a entender o "meme" que ocorria no bate-papo. O requerente não interpretou corretamente a "brincadeira" — situação compreensível dado o contexto. O réu J. pensou que a declaração sobre ausência de pai era parte do humor do momento, e não uma ofensa intencional.</p>
+                    <p>A intenção do réu baseou-se no momento, sendo o "deboche" com intenção de seguir o assunto do bate-papo. Reconhecemos a conduta, entretanto punem-se apenas atos praticados com intenção explícita, o que não se configurou no caso.</p>
+                  </div>
+                  <div class="proc-section">
+                    <div class="proc-section-title">Transparência — Logs</div>
+                    <p>O réu não apagou nenhuma mensagem própria conforme os registros de auditoria do Discord. As mensagens de outros membros foram removidas pelo réu, mas os registros de plataforma são irremovíveis.</p>
+                  </div>
+                  <div class="proc-section">
+                    <div class="proc-section-title">Resolução Final</div>
+                    <p>Diante da análise final, não houve necessidade de levar o caso ao Criador Joe. Condutas assim são punidas apenas quando há intenção comprovada, o que não se verificou. O Tribunal declara o réu Inocente.</p>
+                    <p>• Ambos os lados foram ouvidos. · Nenhum lado foi favorecido. · Medidas preventivas serão adotadas para evitar mal-entendidos futuros.</p>
+                  </div>
+                  <div class="proc-veredicto inocente">Réu Declarado Inocente</div>
+                  <button class="proc-share-btn" onclick="copyProcLink(this, 'proc-02')">
+                    <svg width="10" height="10" viewBox="0 0 10 10" fill="none"><path d="M7 1H9V3M9 1L5 5M4 2H2V8H8V6" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                    Copiar link
+                  </button>
+                  <div class="proc-assinatura">Supremo Tribunal Militar / Revisado pelo Corregedor Geral</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- PROCESSO 03 -->
+          <div class="proc-accordion-item" data-categoria="condenado">
+            <button class="proc-accordion-trigger" aria-expanded="false">
+              <span class="proc-num">PROC. 03/00</span>
+              <span class="proc-status condenado">Condenado</span>
+              <span class="proc-date">2026</span>
+              <span class="proc-title">Conduta Desrespeitosa — Réu 7.silvaaa</span>
+              <span class="proc-icon">
+                <svg width="10" height="10" viewBox="0 0 10 10" fill="none">
+                  <path d="M5 1v8M1 5h8" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/>
+                </svg>
+              </span>
+            </button>
+            <div class="proc-accordion-body">
+              <div class="proc-accordion-inner">
+                <div class="proc-content">
+                  <div class="proc-section">
+                    <div class="proc-section-title">O Ocorrido</div>
+                    <p>Com os fatos apresentados pelo Lz, o réu Silva teria proferido mensagens inadequadas no bate-papo geral utilizando provocações e linguagens inapropriadas, tanto no bate-papo quanto no servidor, com comportamentos de cunho totalmente desrespeitoso.</p>
+                  </div>
+                  <div class="proc-section">
+                    <div class="proc-section-title">Das Leis</div>
+                    <p>Os Artigos 1°, 2°, 4° e 5° da Ordem Constitucional regem pelo respeito e disciplina em todo o servidor, independente de intencionalidade. O réu já acumulava excesso de advertências. O mínimo que um membro deve ter neste servidor é ética — e não tentar acumular o máximo de advertências possíveis.</p>
+                  </div>
+                  <div class="proc-section">
+                    <div class="proc-section-title">Penalidade Aplicada</div>
+                    <p>Pelos Artigos 5° e 6°, o réu 7.silvaaa_04268 recebeu castigo educativo inicial de uma semana. Contudo, devido a outras atitudes do réu registradas pelo Tribunal, a pena foi convertida.</p>
+                    <p><strong style="color:var(--c-light)">Penalidade convertida: Exílio Permanente.</strong></p>
+                  </div>
+                  <div class="proc-veredicto condenado">Réu Condenado — Exílio Permanente</div>
+                  <button class="proc-share-btn" onclick="copyProcLink(this, 'proc-03')">
+                    <svg width="10" height="10" viewBox="0 0 10 10" fill="none"><path d="M7 1H9V3M9 1L5 5M4 2H2V8H8V6" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                    Copiar link
+                  </button>
+                  <div class="proc-assinatura">Tribunal Militar / Supremo Tribunal Militar / Procuradoria Geral do Partido</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- RESOLVIDOS -->
+      <div class="proc-tab-panel" id="proc-tab-resolvidos">
+        <div class="proc-accordion-list" id="proc-list-resolvidos"></div>
+      </div>
+
+      <!-- INOCENTES -->
+      <div class="proc-tab-panel" id="proc-tab-inocentes">
+        <div class="proc-accordion-list" id="proc-list-inocentes"></div>
+      </div>
+
+      <!-- CONDENADOS -->
+      <div class="proc-tab-panel" id="proc-tab-condenados">
+        <div class="proc-accordion-list" id="proc-list-condenados"></div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ESTATUTO -->
+  <section id="estatuto">
+    <div class="label">Documento Oficial</div>
+    <div class="estatuto-header">
+      <h2>Estatuto<br>Institucional</h2>
+      <div class="estatuto-meta">
+        <div class="est-meta-row"><span class="est-meta-key">VERSÃO</span><span class="est-meta-val">REV. 2026</span></div>
+        <div class="est-meta-row"><span class="est-meta-key">ARTIGOS</span><span class="est-meta-val">21 EM VIGOR</span></div>
+        <div class="est-meta-row"><span class="est-meta-key">STATUS</span><span class="est-meta-val">VIGENTE</span></div>
+        <div class="est-meta-row"><span class="est-meta-key">AUTORIDADE</span><span class="est-meta-val">SGTN / STM</span></div>
+      </div>
+    </div>
+
+    <div class="estatuto-motto">"Disciplina, Hierarquia e Lealdade."</div>
+
+    <div class="est-tabs-nav">
+      <button class="est-tab-btn active" data-est-tab="cap1">Cap. I</button>
+      <button class="est-tab-btn" data-est-tab="cap2">Cap. II</button>
+      <button class="est-tab-btn" data-est-tab="cap3">Cap. III</button>
+      <button class="est-tab-btn" data-est-tab="cap4">Cap. IV</button>
+      <button class="est-tab-btn" data-est-tab="cap5">Cap. V</button>
+      <button class="est-tab-btn" data-est-tab="cap6">Cap. VI</button>
+      <button class="est-tab-btn" data-est-tab="cap7">Cap. VII</button>
+    </div>
+
+    <!-- CAP I -->
+    <div class="est-tab-panel active" id="est-tab-cap1">
+    <div class="cap-block">
+      <div class="cap-label">Capítulo I — Disposições Gerais</div>
+      <div class="artigos-list">
+        <div class="artigo-item">
+          <div class="artigo-num">Art. 1</div>
+          <div class="artigo-body">
+            <div class="artigo-title">Finalidade Institucional</div>
+            <p>O presente Estatuto estabelece as normas administrativas, disciplinares e organizacionais do Movimento Tático Nacional (MTN), sendo obrigatório para todos os membros vinculados à instituição.</p>
+          </div>
+        </div>
+        <div class="artigo-item">
+          <div class="artigo-num">Art. 2</div>
+          <div class="artigo-body">
+            <div class="artigo-title">Cumprimento das Normas</div>
+            <p>Todo integrante deverá cumprir integralmente as normas estabelecidas neste Estatuto.</p>
+            <ul class="artigo-items"><li>O desconhecimento das regras não isenta o membro de responsabilidade administrativa.</li></ul>
+          </div>
+        </div>
+        <div class="artigo-item">
+          <div class="artigo-num">Art. 3</div>
+          <div class="artigo-body">
+            <div class="artigo-title">Autoridade Institucional</div>
+            <p>A Secretaria Geral Tática Nacional (SGTN) possuirá autoridade administrativa superior sobre assuntos institucionais do MTN.</p>
+            <ul class="artigo-items"><li>O Supremo Tribunal Militar (STM) será responsável pela análise disciplinar e julgamento institucional.</li></ul>
+          </div>
+        </div>
+      </div>
+    </div>
+    </div>
+
+    <!-- CAP II -->
+    <div class="est-tab-panel" id="est-tab-cap2">
+    <div class="cap-block">
+      <div class="cap-label">Capítulo II — Conduta e Disciplina</div>
+      <div class="artigos-list">
+        <div class="artigo-item">
+          <div class="artigo-num">Art. 4</div>
+          <div class="artigo-body">
+            <div class="artigo-title">Respeito Institucional</div>
+            <p>Todo membro deverá manter respeito, educação e postura adequada dentro do MTN. Ofensas, provocações, perseguições ou comportamentos tóxicos serão considerados infrações disciplinares.</p>
+            <div class="penalidade">Penalidade: Advertência, Suspensão ou Rebaixamento.</div>
+          </div>
+        </div>
+        <div class="artigo-item">
+          <div class="artigo-num">Art. 5</div>
+          <div class="artigo-body">
+            <div class="artigo-title">Respeito Hierárquico</div>
+            <p>Todo integrante deverá respeitar superiores, subordinados e demais membros da instituição. Atos de insubordinação, desacato ou afronta à autoridade poderão resultar em medidas disciplinares.</p>
+            <div class="penalidade">Penalidade: Advertência formal, Suspensão ou Rebaixamento.</div>
+          </div>
+        </div>
+        <div class="artigo-item">
+          <div class="artigo-num">Art. 6</div>
+          <div class="artigo-body">
+            <div class="artigo-title">Organização e Disciplina</div>
+            <p>Os membros deverão manter organização, disciplina e cumprimento das normas institucionais. Condutas que prejudiquem a ordem interna poderão resultar em sanções administrativas.</p>
+            <div class="penalidade">Penalidade: Advertência ou Suspensão administrativa.</div>
+          </div>
+        </div>
+        <div class="artigo-item">
+          <div class="artigo-num">Art. 7</div>
+          <div class="artigo-body">
+            <div class="artigo-title">Comunicação Institucional</div>
+            <p>É proibido causar desordem através de spam, flood ou menções excessivas nos canais oficiais. Os canais institucionais deverão permanecer organizados.</p>
+            <div class="penalidade">Penalidade: Advertência, Mute institucional ou Suspensão.</div>
+          </div>
+        </div>
+        <div class="artigo-item">
+          <div class="artigo-num">Art. 8</div>
+          <div class="artigo-body">
+            <div class="artigo-title">Conduta Externa</div>
+            <p>Membros representando o MTN em outros servidores deverão manter postura compatível com os princípios institucionais.</p>
+            <div class="penalidade">Penalidade: Advertência, Rebaixamento ou Afastamento administrativo.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    </div>
+
+    <!-- CAP III -->
+    <div class="est-tab-panel" id="est-tab-cap3">
+    <div class="cap-block">
+      <div class="cap-label">Capítulo III — Crimes Institucionais</div>
+      <div class="artigos-list">
+        <div class="artigo-item">
+          <div class="artigo-num">Art. 9</div>
+          <div class="artigo-body">
+            <div class="artigo-title">Abuso de Autoridade</div>
+            <p>É proibido utilizar cargos, permissões ou influência institucional para benefício próprio, perseguição ou favorecimento indevido. Toda denúncia poderá ser encaminhada ao STM para investigação.</p>
+            <div class="penalidade">Penalidade: Remoção de cargo, Rebaixamento ou Exílio institucional.</div>
+          </div>
+        </div>
+        <div class="artigo-item">
+          <div class="artigo-num">Art. 10</div>
+          <div class="artigo-body">
+            <div class="artigo-title">Divulgação Indevida de Informações</div>
+            <p>É proibido divulgar documentos, informações internas ou conteúdos sigilosos sem autorização superior. O vazamento de informações será considerado infração grave.</p>
+            <div class="penalidade">Penalidade: Suspensão, Remoção de permissões ou Exílio institucional.</div>
+          </div>
+        </div>
+        <div class="artigo-item">
+          <div class="artigo-num">Art. 11</div>
+          <div class="artigo-body">
+            <div class="artigo-title">Integridade Institucional</div>
+            <p>É proibido espalhar boatos, falsas acusações ou informações manipuladas que prejudiquem a estabilidade institucional do MTN.</p>
+            <div class="penalidade">Penalidade: Advertência formal, Suspensão ou Rebaixamento.</div>
+          </div>
+        </div>
+        <div class="artigo-item">
+          <div class="artigo-num">Art. 12</div>
+          <div class="artigo-body">
+            <div class="artigo-title">Integridade Eleitoral</div>
+            <p>É proibida qualquer tentativa de fraude, manipulação ou interferência indevida em processos eleitorais internos. Infrações eleitorais poderão ser analisadas pelo STM e pela SGTN.</p>
+            <div class="penalidade">Penalidade: Suspensão eleitoral, Remoção de candidatura ou Exílio institucional.</div>
+          </div>
+        </div>
+        <div class="artigo-item">
+          <div class="artigo-num">Art. 13</div>
+          <div class="artigo-body">
+            <div class="artigo-title">Lealdade Institucional</div>
+            <p>É proibida qualquer forma de traição, motim, aliança rival ou atuação contrária aos interesses do MTN.</p>
+            <div class="penalidade">Penalidade: Exílio institucional permanente.</div>
+          </div>
+        </div>
+        <div class="artigo-item">
+          <div class="artigo-num">Art. 14</div>
+          <div class="artigo-body">
+            <div class="artigo-title">Uso Indevido da Instituição</div>
+            <p>É proibido utilizar o nome, imagem ou autoridade do MTN para enganar terceiros ou obter vantagens pessoais.</p>
+            <div class="penalidade">Penalidade: Rebaixamento imediato ou Exílio institucional.</div>
+          </div>
+        </div>
+        <div class="artigo-item artigo-anexo">
+          <div class="artigo-num">Art. 14-B</div>
+          <div class="artigo-body">
+            <div class="artigo-title">Abandono Institucional e Deserção Voluntária</div>
+            <p>Fica terminantemente proibido o ato de se desligar voluntariamente do servidor sem uma justificativa formal previamente aceita pelo Alto Comando. O MTN preza pela lealdade à camisa e não tolerará indecisões emocionais.</p>
+            <ul class="artigo-items">
+              <li><strong>Item I —</strong> O membro que sair do servidor sem motivo justo perderá definitivamente o direito à sua patente anterior.</li>
+              <li><strong>Item II —</strong> Em caso de arrependimento e pedido de retorno, o indivíduo passará por escrutínio da administração e, se aceito, reiniciará compulsoriamente a sua jornada a partir da base.</li>
+            </ul>
+            <div class="penalidade">Penalidade: Perda permanente de patente; reinício compulsório em caso de retorno.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    </div>
+
+    <!-- CAP IV -->
+    <div class="est-tab-panel" id="est-tab-cap4">
+    <div class="cap-block">
+      <div class="cap-label">Capítulo IV — Famílias e Setores</div>
+      <div class="artigos-list">
+        <div class="artigo-item">
+          <div class="artigo-num">Art. 15</div>
+          <div class="artigo-body">
+            <div class="artigo-title">Responsabilidade de Liderança</div>
+            <p>Líderes responderão administrativamente pelas ações praticadas por membros sob sua responsabilidade. A omissão diante de infrações poderá ser considerada conivência institucional.</p>
+            <div class="penalidade">Penalidade: Rebaixamento, Destituição de liderança ou Dissolução administrativa.</div>
+          </div>
+        </div>
+        <div class="artigo-item">
+          <div class="artigo-num">Art. 16</div>
+          <div class="artigo-body">
+            <div class="artigo-title">Conflitos Internos</div>
+            <p>É proibida qualquer forma de ataque, perseguição ou retaliação entre famílias, setores ou grupos vinculados ao MTN. Conflitos deverão ser encaminhados à administração competente.</p>
+            <div class="penalidade">Penalidade: Suspensão, Rebaixamento coletivo ou Dissolução parcial.</div>
+          </div>
+        </div>
+        <div class="artigo-item">
+          <div class="artigo-num">Art. 17</div>
+          <div class="artigo-body">
+            <div class="artigo-title">Expansão Não Autorizada</div>
+            <p>É proibida a criação de subdivisões, alianças paralelas ou organizações secundárias sem autorização administrativa.</p>
+            <div class="penalidade">Penalidade: Dissolução imediata da estrutura irregular e aplicação de medidas administrativas.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    </div>
+
+    <!-- CAP V -->
+    <div class="est-tab-panel" id="est-tab-cap5">
+    <div class="cap-block">
+      <div class="cap-label">Capítulo V — Sistema Disciplinar</div>
+      <div class="artigos-list">
+        <div class="artigo-item">
+          <div class="artigo-num">Art. 18</div>
+          <div class="artigo-body">
+            <div class="artigo-title">Advertências — Sistema Progressivo</div>
+            <p>O MTN adotará sistema disciplinar progressivo para manutenção da ordem institucional.</p>
+            <ul class="artigo-items">
+              <li>O acúmulo de <strong>3 advertências</strong> poderá resultar em Rebaixamento.</li>
+              <li>O acúmulo de <strong>4 advertências</strong> poderá resultar em Suspensão ou Remoção de funções.</li>
+            </ul>
+            <div class="penalidade-note">As penalidades poderão ser aplicadas pela administração competente.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    </div>
+
+    <!-- CAP VI -->
+    <div class="est-tab-panel" id="est-tab-cap6">
+    <div class="cap-block">
+      <div class="cap-label">Capítulo VI — Classificação das Infrações</div>
+      <div class="infrações-grid">
+        <div class="infracao-card">
+          <div class="infracao-nivel">Leve</div>
+          <div class="infracao-desc">Spam, Flood, Desorganização e Conduta inadequada leve.</div>
+        </div>
+        <div class="infracao-card">
+          <div class="infracao-nivel">Média</div>
+          <div class="infracao-desc">Insubordinação, Desrespeito hierárquico, Quebra de protocolo e Divulgação indevida simples.</div>
+        </div>
+        <div class="infracao-card">
+          <div class="infracao-nivel">Grave</div>
+          <div class="infracao-desc">Abuso de autoridade, Fraude eleitoral, Vazamento estratégico e Corrupção administrativa.</div>
+        </div>
+        <div class="infracao-card infracao-gravissima">
+          <div class="infracao-nivel">Gravíssima</div>
+          <div class="infracao-desc">Traição institucional, Motim, Venda de cargos, Aliança rival e Tentativa de desestabilização institucional.</div>
+        </div>
+      </div>
+    </div>
+    </div>
+
+    <!-- CAP VII -->
+    <div class="est-tab-panel" id="est-tab-cap7">
+    <div class="cap-block">
+      <div class="cap-label">Capítulo VII — Disposições Finais</div>
+      <div class="artigos-list">
+        <div class="artigo-item">
+          <div class="artigo-num">Art. 19</div>
+          <div class="artigo-body">
+            <div class="artigo-title">Casos Omissos</div>
+            <p>Casos não previstos neste Estatuto serão analisados pela administração competente.</p>
+          </div>
+        </div>
+        <div class="artigo-item">
+          <div class="artigo-num">Art. 20</div>
+          <div class="artigo-body">
+            <div class="artigo-title">Aplicação das Normas</div>
+            <p>As normas presentes neste documento poderão ser interpretadas e aplicadas conforme a necessidade institucional do MTN.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+    </div>
+
+    <div class="estatuto-footer-note">
+      <span>Documento Oficial do Movimento Tático Nacional — MTN</span>
+      <span>Assinado pela Alta Cúpula &nbsp;·&nbsp; Vigência 2026</span>
+    </div>
+  </section>
+
+  <!-- FOOTER -->
+  <footer>
+    <div class="footer-id">
+      <strong>MTN</strong> — Movimento Tático Nacional &nbsp;/&nbsp; EB Delta, Roblox &nbsp;/&nbsp; © 2026
+    </div>
+    <div class="footer-links">
+      <a href="#hero">Início</a>
+      <a href="#pilares">Pilares</a>
+      <a href="#estrutura">Estrutura</a>
+      <a href="#noticias">Notícias</a>
+      <a href="#processos">Processos</a>
+      <a href="#estatuto">Estatuto</a>
+      <a href="#historico">Histórico</a>
+    </div>
+  </footer>
+
+</div>
+
+<script>
+  /* ─── CANVAS GRID ──────────────────────────────────────────── */
+  (function () {
+    const canvas = document.getElementById('bg-canvas');
+    const ctx = canvas.getContext('2d');
+    let W, H, mouseX = 0, mouseY = 0;
+    const CELL = 64;
+
+    function resize() {
+      W = canvas.width  = window.innerWidth;
+      H = canvas.height = window.innerHeight;
+    }
+
+    window.addEventListener('resize', resize);
+    resize();
+
+    window.addEventListener('mousemove', e => {
+      mouseX = e.clientX / W - 0.5;
+      mouseY = e.clientY / H - 0.5;
+    });
+
+    function draw() {
+      ctx.clearRect(0, 0, W, H);
+
+      const ox = mouseX * 18;
+      const oy = mouseY * 18;
+
+      ctx.strokeStyle = '#2a2a2a';
+      ctx.lineWidth   = 0.5;
+
+      // vertical lines
+      for (let x = (ox % CELL) - CELL; x < W + CELL; x += CELL) {
+        ctx.beginPath();
+        ctx.moveTo(x, 0);
+        ctx.lineTo(x, H);
+        ctx.stroke();
+      }
+      // horizontal lines
+      for (let y = (oy % CELL) - CELL; y < H + CELL; y += CELL) {
+        ctx.beginPath();
+        ctx.moveTo(0, y);
+        ctx.lineTo(W, y);
+        ctx.stroke();
+      }
+
+      // intersection dots
+      ctx.fillStyle = '#3a3a3a';
+      for (let x = (ox % CELL) - CELL; x < W + CELL; x += CELL) {
+        for (let y = (oy % CELL) - CELL; y < H + CELL; y += CELL) {
+          ctx.beginPath();
+          ctx.arc(x, y, 1, 0, Math.PI * 2);
+          ctx.fill();
+        }
+      }
+
+      requestAnimationFrame(draw);
+    }
+    draw();
+  })();
+
+  /* ─── TABS ─────────────────────────────────────────────────── */
+  (function () {
+    const btns   = document.querySelectorAll('.tab-btn');
+    const panels = document.querySelectorAll('.tab-panel');
+
+    btns.forEach(btn => {
+      btn.addEventListener('click', () => {
+        const target = btn.dataset.tab;
+
+        btns.forEach(b => b.classList.remove('active'));
+        panels.forEach(p => p.classList.remove('active'));
+
+        btn.classList.add('active');
+        document.getElementById('tab-' + target).classList.add('active');
+      });
+    });
+  })();
+
+  /* ─── ACCORDION ────────────────────────────────────────────── */
+  (function () {
+    const items = document.querySelectorAll('.accordion-item');
+
+    items.forEach(item => {
+      const trigger = item.querySelector('.accordion-trigger');
+      trigger.addEventListener('click', () => {
+        const isOpen = item.classList.contains('open');
+        // close all
+        items.forEach(i => {
+          i.classList.remove('open');
+          i.querySelector('.accordion-trigger').setAttribute('aria-expanded', 'false');
+        });
+        // open clicked if it was closed
+        if (!isOpen) {
+          item.classList.add('open');
+          trigger.setAttribute('aria-expanded', 'true');
+        }
+      });
+    });
+  })();
+
+  /* ─── PROCESSOS TABS ───────────────────────────────────────── */
+  (function () {
+    const btns   = document.querySelectorAll('.proc-tab-btn');
+    const panels = document.querySelectorAll('.proc-tab-panel');
+
+    // Build filtered lists
+    function buildFiltered() {
+      const all = document.querySelectorAll('#proc-tab-todos .proc-accordion-item');
+      const lists = {
+        resolvidos: document.getElementById('proc-list-resolvidos'),
+        inocentes:  document.getElementById('proc-list-inocentes'),
+        condenados: document.getElementById('proc-list-condenados'),
+      };
+      all.forEach(item => {
+        const cat = item.dataset.categoria;
+        if (lists[cat]) {
+          lists[cat].appendChild(item.cloneNode(true));
+        }
+      });
+      // re-attach accordion events to clones
+      document.querySelectorAll('.proc-accordion-list .proc-accordion-trigger').forEach(trigger => {
+        trigger.addEventListener('click', procAccordionToggle);
+      });
+    }
+
+    function procAccordionToggle() {
+      const item = this.closest('.proc-accordion-item');
+      const isOpen = item.classList.contains('open');
+      const siblings = item.closest('.proc-accordion-list').querySelectorAll('.proc-accordion-item');
+      siblings.forEach(i => {
+        i.classList.remove('open');
+        i.querySelector('.proc-accordion-trigger').setAttribute('aria-expanded', 'false');
+      });
+      if (!isOpen) {
+        item.classList.add('open');
+        this.setAttribute('aria-expanded', 'true');
+      }
+    }
+
+    // attach to original items
+    document.querySelectorAll('#proc-tab-todos .proc-accordion-trigger').forEach(trigger => {
+      trigger.addEventListener('click', procAccordionToggle);
+    });
+
+    buildFiltered();
+
+    btns.forEach(btn => {
+      btn.addEventListener('click', () => {
+        const target = btn.dataset.procTab;
+        btns.forEach(b => b.classList.remove('active'));
+        panels.forEach(p => p.classList.remove('active'));
+        btn.classList.add('active');
+        document.getElementById('proc-tab-' + target).classList.add('active');
+      });
+    });
+  })();
+
+
+  /* ─── NAV PROGRESS BAR ─────────────────────────────────────── */
+  (function () {
+    const bar = document.getElementById('nav-progress');
+    window.addEventListener('scroll', () => {
+      const scrolled = window.scrollY;
+      const total = document.documentElement.scrollHeight - window.innerHeight;
+      bar.style.width = (scrolled / total * 100) + '%';
+    });
+  })();
+
+  /* ─── NAV ACTIVE SECTION ────────────────────────────────────── */
+  (function () {
+    const sections = document.querySelectorAll('section[id]');
+    const links = document.querySelectorAll('.nav-links a');
+    const obs = new IntersectionObserver((entries) => {
+      entries.forEach(e => {
+        if (e.isIntersecting) {
+          links.forEach(l => l.classList.remove('nav-active'));
+          const active = document.querySelector(`.nav-links a[href="#${e.target.id}"]`);
+          if (active) active.classList.add('nav-active');
+        }
+      });
+    }, { threshold: 0.3 });
+    sections.forEach(s => obs.observe(s));
+  })();
+
+  /* ─── ESTATUTO CHAPTER TABS ─────────────────────────────────── */
+  (function () {
+    const btns   = document.querySelectorAll('.est-tab-btn');
+    const panels = document.querySelectorAll('.est-tab-panel');
+    btns.forEach(btn => {
+      btn.addEventListener('click', () => {
+        const target = btn.dataset.estTab;
+        btns.forEach(b => b.classList.remove('active'));
+        panels.forEach(p => p.classList.remove('active'));
+        btn.classList.add('active');
+        document.getElementById('est-tab-' + target).classList.add('active');
+      });
+    });
+  })();
+
+  /* ─── PROC SEARCH ───────────────────────────────────────────── */
+  (function () {
+    const input = document.getElementById('proc-search-input');
+    const noResults = document.getElementById('proc-no-results');
+    if (!input) return;
+    input.addEventListener('input', () => {
+      const q = input.value.toLowerCase().trim();
+      const items = document.querySelectorAll('#proc-tab-todos .proc-accordion-item');
+      let visible = 0;
+      items.forEach(item => {
+        const text = item.textContent.toLowerCase();
+        const match = !q || text.includes(q);
+        item.style.display = match ? '' : 'none';
+        if (match) visible++;
+      });
+      noResults.style.display = visible === 0 ? 'block' : 'none';
+    });
+  })();
+
+  /* ─── COPY PROC LINK ────────────────────────────────────────── */
+  function copyProcLink(btn, id) {
+    const url = window.location.href.split('#')[0] + '#processos';
+    navigator.clipboard.writeText(url + ' — ' + id).then(() => {
+      btn.classList.add('copied');
+      btn.textContent = '✓ Copiado';
+      setTimeout(() => {
+        btn.classList.remove('copied');
+        btn.innerHTML = `<svg width="10" height="10" viewBox="0 0 10 10" fill="none"><path d="M7 1H9V3M9 1L5 5M4 2H2V8H8V6" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg> Copiar link`;
+      }, 2000);
+    });
+  }
+
+
+  /* ─── SCROLL REVEAL ─────────────────────────────────────────── */
+  (function () {
+    const targets = document.querySelectorAll(
+      '.pilar-card, .cupula-card, .metric, .accordion-item'
+    );
+
+    const obs = new IntersectionObserver((entries) => {
+      entries.forEach(e => {
+        if (e.isIntersecting) {
+          e.target.style.opacity = '1';
+          e.target.style.transform = 'translateY(0)';
+          obs.unobserve(e.target);
+        }
+      });
+    }, { threshold: 0.08 });
+
+    targets.forEach(t => {
+      t.style.opacity = '0';
+      t.style.transform = 'translateY(20px)';
+      t.style.transition = 'opacity 0.5s ease, transform 0.5s ease';
+      obs.observe(t);
+    });
+  })();
+</script>
+
+</body>
+</html>
